@@ -6,11 +6,13 @@
 #include <sstream>
 #include <stx/btree_map.h>
 #include <stx/btree_multimap.h>
+#include <ctime>
 
-std::vector<int> load_data(){
+std::vector<int> load_data(std::string filename){
   std::vector<int> data;
   std::string myText;
-  std::ifstream MyReadFile("1dExample.csv");
+  std::string dirname = "/home/z5028465/Desktop/summer/data/1d/data/";
+  std::ifstream MyReadFile(dirname+filename);
   // Use a while loop together with the getline() function to read the file line by line
   while (getline (MyReadFile, myText)) {
     // Output the text from the file
@@ -20,6 +22,22 @@ std::vector<int> load_data(){
   MyReadFile.close();
   return data;
 }
+
+std::vector<int> load_point_query(std::string filename){
+  std::vector<int> data;
+  std::string myText;
+  std::string dirname = "/home/z5028465/Desktop/summer/data/1d/query/";
+  std::ifstream MyReadFile(dirname+filename);
+  // Use a while loop together with the getline() function to read the file line by line
+  while (getline (MyReadFile, myText)) {
+    // Output the text from the file
+    data.push_back(std::stoi(myText));
+  }
+  // Close the file
+  MyReadFile.close();
+  return data;
+}
+
 
 struct range{
    int min;
@@ -51,10 +69,19 @@ std::vector<range> load_queries(){
 
 
 
-int main(){
-    auto data = load_data();
-    auto queries = load_queries();
-    std::cout<<"queries loaded"<<std::endl;
+
+
+
+int main(int argc, char *argv[]) {
+
+    std::string distribution = argv[1];
+    std::string volume = argv[2];
+    std::string query_type = argv[3];
+    std::string data_filename = distribution + volume + ".csv";
+    std::string query_filename = query_type+'-'+distribution+"10000"+".csv";
+    auto data = load_data(data_filename);
+    auto queries = load_point_query(query_filename);
+
     typedef stx::btree_map<int, std::string> btree_type;
     unsigned int numkeys = data.size();
     std::vector<std::pair<int, std::string> > pairs(numkeys);
@@ -67,16 +94,12 @@ int main(){
     std::sort(pairs.begin(), pairs.end());
     btree_type bt;
     bt.bulk_load(pairs.begin(), pairs.end());
-    std::cout<<"tree constructed"<<std::endl;
 
+    std::clock_t begin = clock();
     for (auto & query : queries) {
-      auto max = bt.lower_bound(query.max);
-      auto min = bt.lower_bound(query.min);
-      if( min != bt.end() && max != bt.end()){
-        std::cout << min->first << ' ' << max->first << std::endl;
-      }else{
-        std::cout << 'Q' << query.min << ' ' << query.max<< std::endl;
-      }
+      auto result = bt.lower_bound(query);
     }
+    std::clock_t end = clock();
+    std::cout << "query time: " << float(end-begin)/CLOCKS_PER_SEC << "ms. " << std::endl;
 
 }

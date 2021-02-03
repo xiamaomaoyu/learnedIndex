@@ -5,11 +5,13 @@
 #include "pgm/pgm_index.hpp"
 #include <fstream>
 #include <sstream>
+#include <ctime>
 
-std::vector<int> load_data(){
+std::vector<int> load_data(std::string filename){
   std::vector<int> data;
   std::string myText;
-  std::ifstream MyReadFile("1dExample.csv");
+  std::string dirname = "/home/z5028465/Desktop/summer/data/1d/data/";
+  std::ifstream MyReadFile(dirname+filename);
   // Use a while loop together with the getline() function to read the file line by line
   while (getline (MyReadFile, myText)) {
     // Output the text from the file
@@ -20,15 +22,32 @@ std::vector<int> load_data(){
   return data;
 }
 
+std::vector<int> load_point_query(std::string filename){
+  std::vector<int> data;
+  std::string myText;
+  std::string dirname = "/home/z5028465/Desktop/summer/data/1d/query/";
+  std::ifstream MyReadFile(dirname+filename);
+  // Use a while loop together with the getline() function to read the file line by line
+  while (getline (MyReadFile, myText)) {
+    // Output the text from the file
+    data.push_back(std::stoi(myText));
+  }
+  // Close the file
+  MyReadFile.close();
+  return data;
+}
+
+
 struct range{
    int min;
    int max;
 };
 
-std::vector<range> load_queries(){
+std::vector<range> load_queries(std::string filename){
   std::vector<range> queries;
   std::string myText;
-  std::ifstream MyReadFile("1dQueriesExample.csv");
+  std::string dirname = "/home/z5028465/Desktop/summer/data/1d/query/";
+  std::ifstream MyReadFile(dirname+filename);
   // Use a while loop together with the getline() function to read the file line by line
   while (getline (MyReadFile, myText)) {
     // Output the text from the file
@@ -48,29 +67,41 @@ std::vector<range> load_queries(){
 }
 
 
+int point_query(int query,auto index, std::vector<int>  data){
+  auto range = index.search(query);
+  auto lo = data.begin() + range.lo;
+  auto hi = data.begin() + range.hi;
+  auto result = *std::lower_bound(lo, hi, query);
+  return result;
+}
+
+
+range range_query(range query,auto index,std::vector<int>  data){
+  auto max = point_query(query.max,index,data);
+  auto min = point_query(query.min,index,data);
+  return {min ,max};
+}
 
 
 
-int main() {
+int main(int argc, char *argv[]) {
 
-    auto data = load_data();
-    auto queries = load_queries();
+    std::string distribution = argv[1];
+    std::string volume = argv[2];
+    std::string query_type = argv[3];
+    std::string data_filename = distribution + volume + ".csv";
+    std::string query_filename = query_type+'-'+distribution+"10000"+".csv";
+    auto data = load_data(data_filename);
+    auto queries = load_point_query(query_filename);
     // Construct the PGM-index
-    const int epsilon = 128; // space-time trade-off parameter
+    const int epsilon = 4; // space-time trade-off parameter
     pgm::PGMIndex<int, epsilon> index(data);
+    std::clock_t begin = clock();
     for (auto & query : queries) {
-      auto up_range = index.search(query.max);
-      auto up_lo = data.begin() + up_range.lo;
-      auto up_hi = data.begin() + up_range.hi;
-      auto max = *std::lower_bound(up_lo, up_hi, query.max);
-      auto lo_range = index.search(query.min);
-      auto lo_lo = data.begin() + lo_range.lo;
-      auto lo_hi = data.begin() + lo_range.hi;
-      auto min = *std::lower_bound(lo_lo, lo_hi, query.min);
-      range result{min ,max};
-      std::cout << result.min << ' ' << result.max << std::endl;
+      auto res = point_query(query,index,data);
     }
 
-
+    std::clock_t end = clock();
+    std::cout << "query time: " << float(end-begin)/CLOCKS_PER_SEC << "ms. " << std::endl;
     return 0;
 }
