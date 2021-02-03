@@ -94,7 +94,7 @@ int main(int argc, char *argv[]) {
     auto data = load_data(data_filename);
     auto queries = load_point_query(query_filename);
     // Construct the PGM-index
-    const int epsilon = 4; // space-time trade-off parameter
+    const int epsilon = 256; // space-time trade-off parameter
     pgm::PGMIndex<int, epsilon> index(data);
     std::clock_t begin = clock();
     for (auto & query : queries) {
