@@ -69,10 +69,10 @@ std::vector<range> load_queries(std::string filename){
 
 int point_query(int query,auto index, std::vector<int>  data){
   auto range = index.search(query);
-  auto lo = data.begin() + range.lo;
-  auto hi = data.begin() + range.hi;
-  auto result = *std::lower_bound(lo, hi, query);
-  return result;
+  // auto lo = data.begin() + range.lo;
+  // auto hi = data.begin() + range.hi;
+  // auto result = *std::lower_bound(lo, hi, query);
+  return 0;
 }
 
 
@@ -94,14 +94,18 @@ int main(int argc, char *argv[]) {
     auto data = load_data(data_filename);
     auto queries = load_point_query(query_filename);
     // Construct the PGM-index
-    const int epsilon = 256; // space-time trade-off parameter
-    pgm::PGMIndex<int, epsilon> index(data);
+    const int epsilon = 512; // space-time trade-off parameter
+    pgm::PGMIndex<int, epsilon,1> index(data);
+    std::cout<<index.height()<<std::endl;
     std::clock_t begin = clock();
     for (auto & query : queries) {
-      auto res = point_query(query,index,data);
+      auto range = index.search(query);
+      auto lo = data.begin() + range.lo;
+      auto hi = data.begin() + range.hi;
+      auto result = *std::lower_bound(lo, hi, query);
     }
-
     std::clock_t end = clock();
+
     std::cout << "query time: " << float(end-begin)/CLOCKS_PER_SEC << "ms. " << std::endl;
     return 0;
 }

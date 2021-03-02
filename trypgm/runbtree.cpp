@@ -4,8 +4,7 @@
 #include <algorithm>
 #include <fstream>
 #include <sstream>
-#include <stx/btree_map.h>
-#include <stx/btree_multimap.h>
+#include "stx/btree_map.h"
 #include <ctime>
 
 std::vector<int> load_data(std::string filename){
