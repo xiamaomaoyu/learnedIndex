@@ -4,9 +4,6 @@ import matplotlib.patches as patches
 
 
 
-# 生成正态分布的点集
-# 将他们变成 正方形
-
 def add_query(query,ax):
     (xrange, yrange) = query
     mins = (xrange[0], yrange[0])
@@ -46,27 +43,32 @@ def generate_points(center,quantity):
         l.append((x[i],y[i]))
     return l
 
+def generate_queries(center,quantity,size):
+    pts = generate_points(center, quantity)
+    return pts2squares(pts,size)
 
 
-X = np.genfromtxt('poi1w_1000.csv',delimiter=",",skip_header=True)
+X = np.genfromtxt('./data/poi/poi1w_1000.csv',delimiter=",",skip_header=True)
 # queries = [[[250,270],[80,100]],
 #            [[251,271],[81,101]]]
 
+
+queries = []
+
 center = (1700,2100)
-pts = generate_points(center,2000)
+queries += generate_queries(center,quantity=3000,size=30)
 center = (1780,2150)
-pts += generate_points(center,1000)
+queries += generate_queries(center,quantity=2000,size=20)
 center = (1870,2260)
-pts += generate_points(center,2000)
-queries = pts2squares(pts,10)
-
-print(queries)
-print(len(queries))
-
-
-
+queries += generate_queries(center,quantity=3000,size=30)
+center = (1840,2200)
+queries += generate_queries(center,quantity=2000,size=10)
 
 fig, ax = plt.subplots(figsize=(20, 10))
 plot_data(X,ax)
 plot_queries(queries,ax)
 fig.show()
+
+print(queries)
+print(len(queries))
+
