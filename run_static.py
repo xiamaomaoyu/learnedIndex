@@ -35,10 +35,10 @@ def kernelswithValue(kernel_values):
         kernels.append(k)
     return kernels
 
-def kernelsInit(base):
+def kernelsInit(base,level):
     init_k_value = generate_init_k_values(base)
     kernels_values = []
-    for i in range(9):
+    for i in range(level):
         kernels_values.append(deepcopy(init_k_value))
     return kernelswithValue(kernels_values)
 
@@ -67,8 +67,8 @@ kernel_values = [kernel_0,
                  kernel_10,
                  kernel_11]
 
-kernels = kernelswithValue(kernel_values)
-#kernels = kernelsInit(2)
+#kernels = kernelswithValue(kernel_values)
+kernels = kernelsInit(base=2,level = 12)
 
 
 orderModel = flexOrder(kernels,base=2)
@@ -83,7 +83,7 @@ gts = groundTruth(X,queries)
 m = Model(orderModel)
 m.fit(X)
 print(m.D[:,2])
-pd.DataFrame(m.D[:,2]).to_csv('1dExample.csv',index=False)
+pd.DataFrame(m.D[:,2]).to_csv('1dExamplez.csv',index=False)
 # check_i = 0
 # #m.plot_query(queries[check_i])
 # print(m.inefficiency_batch(queries,gts))
@@ -92,4 +92,4 @@ pd.DataFrame(m.D[:,2]).to_csv('1dExample.csv',index=False)
 ranges = []
 for i in range(len(queries)):
     ranges.append(m.search(queries[i]))
-pd.DataFrame(ranges).to_csv('1dQueriesExample.csv',index=False)
+pd.DataFrame(ranges).to_csv('1dQueriesExamplez.csv',index=False)
